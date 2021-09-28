@@ -1,10 +1,11 @@
 #2043444702:AAEXY9_kT90nK1PmlTs0Y_IYpbBC6v-LgKg
+import time
 
 import telebot
 from telebot import types
 import datetime
 from datetime import datetime
-
+from DB import *
 
 token = '2043444702:AAEXY9_kT90nK1PmlTs0Y_IYpbBC6v-LgKg'
 bot=telebot.TeleBot(token)
@@ -12,13 +13,16 @@ bot=telebot.TeleBot(token)
 
 #=====================================================
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start'])# Создает в базе запись с ID чата
 def startTextBot(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row('Я тут')
+    markup.row('⏲ Да я запустил таймер с утра')
     bot.send_message(message.chat.id, 'Привет, {0.first_name}! \nЯ {1.first_name}. '.format(message.from_user, bot.get_me()), parse_mode='html',
                      reply_markup=markup)
-    user = message.from_user.username
+    user_id = message.chat.id
+    print(user_id)
+    db  = DB()
+    db.create_user(user_id)
 
 @bot.message_handler(commands=['stop'])
 def start(message):
@@ -35,45 +39,64 @@ def start(message):
 
 @bot.message_handler(content_types=['text'])
 def startTextBot(message):
-    hourMinute = datetime.now()
-    print(hourMinute.minute)
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row('⏲ Да я таймер запустил')
-    bot.send_message(message.chat.id, "Ты таймер запустил ?", reply_markup=markup)
-    print(message.chat.id)
-
-    if message.text == "⏲ Да я таймер запустил":
+    if message.text == "⏲ Да я запустил таймер с утра":
         # Запуск скрипта на изменения статуса
-        chats =674868256
-        bot.send_message(chat_id=chats,  text="tests")
+        chats =message.chat.id
+        db_morning_update = DB()
+        db_morning_update.morning_update(chats)
+        bot.send_message(chat_id=chats,  text="morning_update")
+        flag=False
+    if message.text == "⏲ Да я запустил таймер вечером":
+        # Запуск скрипта на изменения статуса
+        chats =message.chat.id
+        db_evening_update = DB()
+        db_evening_update.evening_update(chats)
+        bot.send_message(chat_id=chats,  text="evening_update")
         flag=False
 
 
-def morning():
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row('⏲ Да я таймер запустил')
-    chats = 674868256
-    bot.send_message(chat_id=chats, text="Ты таймер запустил ?",reply_markup=markup)
+def morning(): # Функция которая спрашивает у пользователя включтил ли он Таймер
+    get_users_db = DB()
+    for i in range(len(get_users_db.get_users())):
+        if get_users_db.get_users()[i][1] == 0:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.row('⏲ Да я запустил таймер с утра')
+            chats = get_users_db.get_users()[i][0]
+            print(chats)
+            try:
+                bot.send_message(chat_id=chats, text="Ты таймер запустил ?",reply_markup=markup)
+            except:
+                print("Херня")
 
 #morning()
+def evening():
+    get_users_db = DB()
+    for i in range(len(get_users_db.get_users())):
+        if get_users_db.get_users()[i][2] == 0:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.row('⏲ Да я запустил таймер вечером')
+            chats = get_users_db.get_users()[i][0]
+            try:
+                bot.send_message(chat_id=chats, text="Ты таймер запустил ?", reply_markup=markup)
+            except:
+                print("Херня")
+#evening()
+def get_users_all_test_morning():
+    get_users_db = DB()
+    users_morning_statusF=[]
+    for i in range(len(get_users_db.get_users())):
+        if get_users_db.get_users()[i][1] == 1:
+            print(get_users_db.get_users()[i][0])
+            users_morning_statusF.append(get_users_db.get_users()[i][0])
+    return users_morning_statusF
+        #print(get_users_db.get_users()[i][1])
 
-bot.polling(none_stop=False)
+def mid_nigth_update():
+    nigth_update=DB()
+    nigth_update.mid_nigth_update()
+mid_nigth_update()
+
+bot.polling(none_stop=True,interval=1)
 
 
-
-#     hourMinute = datetime.now()
-#     nowday = datetime.today().strftime('%A')
-#     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-#     hour = [9,14,17]
-#     minus = [10,15,20,25,30,35,40,45,50,55]
-#     if nowday in days:
-#         print("days OK")
-#         if hourMinute.hour in hour:
-#             print("hour ok")
-#             flag=True
-#bots.polling(none_stop=True)
-#
-#
-
-#

@@ -12,7 +12,7 @@ class DB:
         self.cursor.execute(f"SELECT user_id FROM employees WHERE user_id = {str(user_id)}")
         data = self.cursor.fetchone()
         if data is None:
-            self.cursor.execute("INSERT INTO employees(user_id) VALUES(?);", str(user_id))
+            self.cursor.execute("INSERT INTO employees(user_id) VALUES(?);", [str(user_id)])
             self.con.commit()
         else:
             pass
@@ -20,7 +20,7 @@ class DB:
 
     def delete_user(self, user_id):
         # удаление пользователя из базы данных по id
-        delete = f"DELETE FROM employees WHERE user_id = {str(user_id)}"
+        delete = f"DELETE FROM employees WHERE user_id = [str(user_id)]"
         self.cursor.execute(delete)
         self.con.commit()
 
@@ -44,3 +44,7 @@ class DB:
         # смена статуса при нажатии на кнопку вечером
         self.cursor.execute(f"UPDATE employees SET status_evening = TRUE WHERE user_id = {str(user_id)}")
         self.con.commit()
+
+
+#db =DB()
+#db.create_user("674868256")
