@@ -1,17 +1,16 @@
 #2043444702:AAEXY9_kT90nK1PmlTs0Y_IYpbBC6v-LgKg
-import time
-
+import os
+from flask import Flask, request
 import telebot
 from telebot import types
-import datetime
-from datetime import datetime
 from DB import *
 
+#==========================================================================================================
+server = Flask(__name__)
 token = '2043444702:AAEXY9_kT90nK1PmlTs0Y_IYpbBC6v-LgKg'
 bot=telebot.TeleBot(token)
-#=====================================================
 
-#=====================================================
+#==========================================================================================================
 
 @bot.message_handler(commands=['start'])# Создает в базе запись с ID чата
 def startTextBot(message):
@@ -23,19 +22,7 @@ def startTextBot(message):
     print(user_id)
     db  = DB()
     db.create_user(user_id)
-
-@bot.message_handler(commands=['stop'])
-def start(message):
-    chats = 674868256
-    bot.send_message(chat_id=chats, text="tests /end")
-    return chats
-
-@bot.message_handler(commands=['end'])
-def start(message):
-    chats = 674868256
-    bot.send_message(chat_id=chats, text="tests /stop")
-
-
+#==========================================================================================================
 
 @bot.message_handler(content_types=['text'])
 def startTextBot(message):
@@ -54,6 +41,7 @@ def startTextBot(message):
         db_evening_update.evening_update(chats)
         bot.send_message(chat_id=chats,  text="evening_update")
         flag=False
+#==========================================================================================================
 
 
 def morning(): # Функция которая спрашивает у пользователя включтил ли он Таймер
@@ -68,6 +56,7 @@ def morning(): # Функция которая спрашивает у поль�
                 bot.send_message(chat_id=chats, text="Ты таймер запустил ?",reply_markup=markup)
             except:
                 print("Херня")
+#==========================================================================================================
 
 #morning()
 def evening():
@@ -81,6 +70,8 @@ def evening():
                 bot.send_message(chat_id=chats, text="Ты таймер запустил ?", reply_markup=markup)
             except:
                 print("Херня")
+#==========================================================================================================
+
 #evening()
 def get_users_all_test_morning():
     get_users_db = DB()
@@ -91,12 +82,29 @@ def get_users_all_test_morning():
             users_morning_statusF.append(get_users_db.get_users()[i][0])
     return users_morning_statusF
         #print(get_users_db.get_users()[i][1])
+#==========================================================================================================
 
 def mid_nigth_update():
     nigth_update=DB()
     nigth_update.mid_nigth_update()
 mid_nigth_update()
+#==========================================================================================================
 
+#==========================================================================================================
+
+@server.route('/' + token, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url='https://your_heroku_project.com/' + token)
+    return "!", 200
 bot.polling(none_stop=True,interval=1)
 
-
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
