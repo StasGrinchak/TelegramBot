@@ -2,7 +2,7 @@ import os
 
 from periodical.celery import app
 
-from main import morning,evening
+from bot import morning,evening
 @app.task
 def add(x, y):
     print("Функция работает только Утром с 9 до 17")

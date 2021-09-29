@@ -10,7 +10,7 @@ app = Celery('periodical',
 app.conf.beat_schedule = {
     'add-every-20-seconds': {
         'task': 'periodical.tasks.add',
-        'schedule':crontab (minute='*/10',hour='9,17', day_of_week='mon,tue,wed,thu,fri'),
+        'schedule':crontab (minute='*/10',hour='9,16', day_of_week='mon,tue,wed,thu,fri'),
         'args': (16, 16)
     },
     'add-every-10-seconds': {
